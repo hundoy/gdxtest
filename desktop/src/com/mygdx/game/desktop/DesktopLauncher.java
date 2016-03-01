@@ -2,6 +2,7 @@ package com.mygdx.game.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.mygdx.game.DropEx;
 import com.mygdx.game.MyGdxGame;
 
 public class DesktopLauncher {
@@ -10,6 +11,6 @@ public class DesktopLauncher {
 		config.title = "tik pill";
 		config.width = 1069;
 		config.height = 600;
-		new LwjglApplication(new MyGdxGame(), config);
+		new LwjglApplication(new DropEx(), config);
 	}
 }
