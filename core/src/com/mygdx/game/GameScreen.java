@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.TimeUtils;
 
 public class GameScreen implements Screen {
@@ -26,8 +27,11 @@ public class GameScreen implements Screen {
 	
 	private Texture img;
 	private Texture yao;
+	private Texture cut;
 	private Rectangle tikRect;
-	private Array<Rectangle> yaoRectArr;
+//	private Array<Rectangle> yaoRectArr;
+	private Array<DropItem> dropArr;
+	private Pool<DropItem> dropPool;
 	private long lastDropTime;
 	
 	Music bgm;
@@ -51,12 +55,20 @@ public class GameScreen implements Screen {
 		// graphic
 		img = new Texture(Gdx.files.internal("texture/suntik.jpg"));
 		yao = new Texture(Gdx.files.internal("texture/yao.jpg"));
+		cut = new Texture(Gdx.files.internal("texture/cut.jpg"));
 		tikRect = new Rectangle();
 		tikRect.x = 1069/2-120/2;
 		tikRect.y = 20;
 		tikRect.width = 120;
 		tikRect.height = 120;
-		yaoRectArr = new Array<Rectangle>();
+//		yaoRectArr = new Array<Rectangle>();
+		dropArr = new Array<DropItem>();
+		dropPool = new Pool<DropItem>(){
+			@Override
+			protected DropItem newObject() {
+				return new DropItem();
+			}
+		};
 		spawnYao();
 		
 		// bgm
@@ -86,18 +98,37 @@ public class GameScreen implements Screen {
 		if (TimeUtils.nanoTime() - lastDropTime > 200000000){
 			spawnYao();
 		}
-		Iterator<Rectangle> yaoIt = yaoRectArr.iterator();
-		while (yaoIt.hasNext()){
-			Rectangle rect = yaoIt.next();
-			rect.y -= 200*Gdx.graphics.getDeltaTime();
-			if (rect.y+37<0){
-				yaoIt.remove();
-			} else{
-				if (rect.overlaps(tikRect)){
+//		Iterator<Rectangle> yaoIt = yaoRectArr.iterator();
+//		while (yaoIt.hasNext()){
+//			Rectangle rect = yaoIt.next();
+//			rect.y -= 200*Gdx.graphics.getDeltaTime();
+//			if (rect.y+37<0){
+//				yaoIt.remove();
+//			} else{
+//				if (rect.overlaps(tikRect)){
+//					zwei.play();
+//					yaoGot++;
+//					yaoIt.remove();
+//				}
+//			}
+//		}
+		Iterator<DropItem> dropIt = dropArr.iterator();
+		while(dropIt.hasNext()){
+			DropItem drop = dropIt.next();
+			drop.update(Gdx.graphics.getDeltaTime());
+			if (drop.rect.y+37<0){
+				dropIt.remove();
+				dropPool.free(drop);
+			} else if(drop.rect.overlaps(tikRect)){
+				if (drop.sort==1){
 					zwei.play();
 					yaoGot++;
-					yaoIt.remove();
+				} else{
+					jiu.play();
+					yaoGot = Math.max(0, yaoGot-10);
 				}
+				dropIt.remove();
+				dropPool.free(drop);
 			}
 		}
 		
@@ -109,8 +140,12 @@ public class GameScreen implements Screen {
 		game.batch.begin();
 		game.font.draw(game.batch, "Pills Collected: " + yaoGot, 0, 600);
 		game.batch.draw(img, tikRect.x, tikRect.y);
-		for(Rectangle rect: yaoRectArr){
-			game.batch.draw(yao, rect.x, rect.y);
+		for(DropItem drop: dropArr){
+			if (drop.sort==1){
+				game.batch.draw(yao, drop.rect.x, drop.rect.y);
+			} else if(drop.sort==2){
+				game.batch.draw(cut, drop.rect.x, drop.rect.y);
+			}
 		}
 		game.batch.end();
 		
@@ -141,12 +176,17 @@ public class GameScreen implements Screen {
 	}
 	
 	private void spawnYao(){
-		Rectangle rect = new Rectangle();
-		rect.x = MathUtils.random(0, 1069-37);
-		rect.y = 600;
-		rect.width = 37;
-		rect.height = 37;
-		yaoRectArr.add(rect);
+//		Rectangle rect = new Rectangle();
+//		rect.x = MathUtils.random(0, 1069-37);
+//		rect.y = 600;
+//		rect.width = 37;
+//		rect.height = 37;
+//		yaoRectArr.add(rect);
+		
+		DropItem drop = dropPool.obtain();
+		drop.init(MathUtils.random(1, 2), MathUtils.random(0, 1069-37), 600);
+		dropArr.add(drop);
+		
 		lastDropTime = TimeUtils.nanoTime();
 	}
 	
