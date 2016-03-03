@@ -7,8 +7,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
@@ -108,6 +111,9 @@ public class TwodMapScreen implements Screen {
 		game.batch.draw(curFrame, 500, 300);
 //		game.batch.flush();
 //		ScissorStack.popScissors();
+		game.font.draw(game.batch, "今天天气不错", 0, 100);
+		game.font.draw(game.batch, "风和日丽的天气有的字不显示真好！", 0, 150);
+		
 		game.batch.end();
 	}
 	
